@@ -3,7 +3,8 @@ package cg.edu.hm.pohl.student;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import ba.pohl1.hm.edu.vrlibrary.model.VRComponent;
 import ba.pohl1.hm.edu.vrlibrary.rendering.RendererManager;
@@ -18,6 +19,10 @@ import static android.opengl.GLES20.glUniform4fv;
 import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glVertexAttribPointer;
 
+import static cg.edu.hm.pohl.student.VertexObject.FLOATS_PER_VERTEX;
+import static cg.edu.hm.pohl.student.VertexObject.FLOATS_PER_COLOR;
+import static cg.edu.hm.pohl.student.VertexObject.FLOATS_PER_NORMAL;
+
 /**
  * Created by Pohl on 14.04.2016.
  */
@@ -25,28 +30,12 @@ public class StudentScene extends VRComponent {
 
     private static final String TAG = "StudentScene";
     private static final int TESSELLATION = 8;
-    private static final int NUMBER_OF_VERTICES = TESSELLATION * 3 * 3 * 2;
-    private static final float RADIUS = .5f;
-    private static final double PI_2 = 2.0f * Math.PI;
-    private static final double DELTA_ANGLE = (Math.PI / (TESSELLATION / 2));
+    private static final float RADIUS = 1f;
+    private static final FloatColor clothColor = new FloatColor(0.52f, 0.82f, 0.47f, 1f);
+    private static final FloatColor skinColor = new FloatColor(0.80f, 0.61f, 0.45f, 1f);
 
-    private static final int FLOATS_PER_VERTEX = 3;
-    private static final int FLOATS_PER_COLOR = 4;
-    private static final int FLOATS_PER_NORMAL = 3;
+    private List<VertexObjectBuffer> buffers = new ArrayList<>();
 
-    private float[] coneVertices;
-    private float[] coneColors;
-    private float[] coneNormals;
-    private float[] coneBottomVertices;
-    private float[] coneBottomColors;
-    private float[] coneBottomNormals;
-
-    private FloatBuffer verticesBuffer;
-    private FloatBuffer colorsBuffer;
-    private FloatBuffer normalsBuffer;
-    private FloatBuffer verticesBottomBuffer;
-    private FloatBuffer colorsBottomBuffer;
-    private FloatBuffer normalsBottomBuffer;
     private Shader shader;
 
     private DataStructures.Matrices matrices = new DataStructures.Matrices();
@@ -60,7 +49,18 @@ public class StudentScene extends VRComponent {
 
     public StudentScene() {
         shader = CardboardGraphicsActivity.studentSceneShader;
-        createCone();
+
+        Cone upper = new Cone(TESSELLATION, RADIUS-0.2f, 1.0f, clothColor);
+        upper.move(0,.7f,0);
+        addVertexObject(upper);
+
+        Sphere middle = new Sphere(16, 1.0f, skinColor);
+        addVertexObject(middle);
+
+        Cone lower = new Cone(TESSELLATION, RADIUS, 1.0f, clothColor);
+        lower.move(0,-1.5f,0);
+        addVertexObject(lower);
+
         // Get the shader's attribute and uniform handles used to delegate data from
         // the CPU to the GPU
         locations.vertex_in = shader.getAttribute("vertex_in");
@@ -85,8 +85,7 @@ public class StudentScene extends VRComponent {
 
         // Transform the shape
         translateZ(-5f);
-        translateY(2.0f);
-        rotateZ(90);
+        translateY(2.5f);
 
         // Update collision box bounds
         updateBounds(this);
@@ -107,8 +106,7 @@ public class StudentScene extends VRComponent {
         glUniform4fv(locations.light_specular, 1, light.specular, 0);
 
         // Finally draw the cone
-        drawTopPart();
-        drawBottomPart();
+        drawObjects();
 
         // Check for possible errors.
         // If there is one, it is most probably related to an issue with the
@@ -117,135 +115,17 @@ public class StudentScene extends VRComponent {
         CGUtils.checkGLError(TAG, "Error while drawing!");
     }
 
-    private void drawTopPart() {
-        glVertexAttribPointer(locations.vertex_in, FLOATS_PER_VERTEX, GL_FLOAT, false, 0, verticesBuffer);
-        glVertexAttribPointer(locations.color_in, FLOATS_PER_COLOR, GL_FLOAT, false, 0, colorsBuffer);
-        glVertexAttribPointer(locations.normal_in, FLOATS_PER_NORMAL, GL_FLOAT, false, 0, normalsBuffer);
+    private void drawObjects() {
+        for(VertexObjectBuffer buffer : buffers){
+            glVertexAttribPointer(locations.vertex_in, FLOATS_PER_VERTEX, GL_FLOAT, false, 0, buffer.getVerticesBuffer());
+            glVertexAttribPointer(locations.color_in, FLOATS_PER_COLOR, GL_FLOAT, false, 0, buffer.getColorsBuffer());
+            glVertexAttribPointer(locations.normal_in, FLOATS_PER_NORMAL, GL_FLOAT, false, 0, buffer.getNormalsBuffer());
 
-        glDrawArrays(GLES20.GL_TRIANGLES, 0, coneVertices.length / FLOATS_PER_VERTEX);
-    }
-
-    private void drawBottomPart() {
-        glVertexAttribPointer(locations.vertex_in, FLOATS_PER_VERTEX, GL_FLOAT, false, 0, verticesBottomBuffer);
-        glVertexAttribPointer(locations.color_in, FLOATS_PER_COLOR, GL_FLOAT, false, 0, colorsBottomBuffer);
-        glVertexAttribPointer(locations.normal_in, FLOATS_PER_NORMAL, GL_FLOAT, false, 0, normalsBottomBuffer);
-
-        glDrawArrays(GLES20.GL_TRIANGLES, 0, coneBottomVertices.length / FLOATS_PER_VERTEX);
-    }
-
-    private void createCone() {
-        coneVertices = new float[NUMBER_OF_VERTICES];
-        coneColors = new float[NUMBER_OF_VERTICES / 3 * 4];
-        coneNormals = new float[NUMBER_OF_VERTICES];
-        coneBottomVertices = new float[NUMBER_OF_VERTICES];
-        coneBottomColors = new float[NUMBER_OF_VERTICES / 3 * 4];
-        coneBottomNormals = new float[NUMBER_OF_VERTICES];
-
-        int index = 0;
-        for(float angle = 0.0f; angle < PI_2; angle += DELTA_ANGLE) {
-            // Calculate x and z of the cone
-            float x1 = (float) (RADIUS * Math.sin(angle));
-            float z1 = (float) (RADIUS * Math.cos(angle));
-            float x2 = (float) (RADIUS * Math.sin(angle + DELTA_ANGLE));
-            float z2 = (float) (RADIUS * Math.cos(angle + DELTA_ANGLE));
-
-            // Calculate offset for vertices and colors
-            final int vertexIndex = index * 9;
-            final int colorIndex = index * 12;
-            // Increment the index
-            index++;
-
-            // First vertex
-            coneVertices[vertexIndex] = 0;
-            coneVertices[vertexIndex + 1] = .5f;
-            coneVertices[vertexIndex + 2] = 0;
-            coneNormals[vertexIndex] = 0;
-            coneNormals[vertexIndex + 1] = 1f;
-            coneNormals[vertexIndex + 2] = 0;
-            // Second vertex
-            coneVertices[vertexIndex + 3] = x1;
-            coneVertices[vertexIndex + 4] = -.5f;
-            coneVertices[vertexIndex + 5] = z1;
-            coneNormals[vertexIndex + 3] = x1;
-            coneNormals[vertexIndex + 4] = .5f;
-            coneNormals[vertexIndex + 5] = z1;
-            // Third vertex
-            coneVertices[vertexIndex + 6] = x2;
-            coneVertices[vertexIndex + 7] = -.5f;
-            coneVertices[vertexIndex + 8] = z2;
-            coneNormals[vertexIndex + 6] = x2;
-            coneNormals[vertexIndex + 7] = .5f;
-            coneNormals[vertexIndex + 8] = z2;
-
-            // First bottom vertex
-            coneBottomVertices[vertexIndex] = 0;
-            coneBottomVertices[vertexIndex + 1] = -.5f;
-            coneBottomVertices[vertexIndex + 2] = 0;
-            coneBottomNormals[vertexIndex] = 0;
-            coneBottomNormals[vertexIndex + 1] = 1f;
-            coneBottomNormals[vertexIndex + 2] = 0;
-            // Second bottom vertex
-            coneBottomVertices[vertexIndex + 3] = x1;
-            coneBottomVertices[vertexIndex + 4] = -.5f;
-            coneBottomVertices[vertexIndex + 5] = z1;
-            coneBottomNormals[vertexIndex + 3] = 0;
-            coneBottomNormals[vertexIndex + 4] = 1f;
-            coneBottomNormals[vertexIndex + 5] = 0;
-            // Third bottom vertex
-            coneBottomVertices[vertexIndex + 6] = x2;
-            coneBottomVertices[vertexIndex + 7] = -.5f;
-            coneBottomVertices[vertexIndex + 8] = z2;
-            coneBottomNormals[vertexIndex + 6] = 0;
-            coneBottomNormals[vertexIndex + 7] = 1f;
-            coneBottomNormals[vertexIndex + 8] = 0;
-
-            // Alternate the color
-            float colorR, colorG, colorB, colorA;
-            if((index % 2) == 0) {
-                colorR = 1f;
-                colorG = 0f;
-                colorB = 0f;
-                colorA = 1f;
-            } else {
-                colorR = 0f;
-                colorG = 0f;
-                colorB = 1f;
-                colorA = 1f;
-            }
-            coneColors[colorIndex] = colorR;
-            coneColors[colorIndex + 1] = colorG;
-            coneColors[colorIndex + 2] = colorB;
-            coneColors[colorIndex + 3] = colorA;
-            coneColors[colorIndex + 4] = colorR;
-            coneColors[colorIndex + 5] = colorG;
-            coneColors[colorIndex + 6] = colorB;
-            coneColors[colorIndex + 7] = colorA;
-            coneColors[colorIndex + 8] = colorR;
-            coneColors[colorIndex + 9] = colorG;
-            coneColors[colorIndex + 10] = colorB;
-            coneColors[colorIndex + 11] = colorA;
-
-            coneBottomColors[colorIndex] = colorR;
-            coneBottomColors[colorIndex + 1] = colorG;
-            coneBottomColors[colorIndex + 2] = colorB;
-            coneBottomColors[colorIndex + 3] = colorA;
-            coneBottomColors[colorIndex + 4] = colorR;
-            coneBottomColors[colorIndex + 5] = colorG;
-            coneBottomColors[colorIndex + 6] = colorB;
-            coneBottomColors[colorIndex + 7] = colorA;
-            coneBottomColors[colorIndex + 8] = colorR;
-            coneBottomColors[colorIndex + 9] = colorG;
-            coneBottomColors[colorIndex + 10] = colorB;
-            coneBottomColors[colorIndex + 11] = colorA;
+            glDrawArrays(GLES20.GL_TRIANGLES, 0, buffer.getObject().getVertices().length / FLOATS_PER_VERTEX);
         }
+    }
 
-        // Create buffers needed by the GPU
-        verticesBuffer = CGUtils.createFloatBuffer(coneVertices);
-        colorsBuffer = CGUtils.createFloatBuffer(coneColors);
-        normalsBuffer = CGUtils.createFloatBuffer(coneNormals);
-
-        verticesBottomBuffer = CGUtils.createFloatBuffer(coneBottomVertices);
-        colorsBottomBuffer = CGUtils.createFloatBuffer(coneBottomColors);
-        normalsBottomBuffer = CGUtils.createFloatBuffer(coneBottomNormals);
+    private void addVertexObject(VertexObject object){
+        buffers.add(new VertexObjectBuffer(object));
     }
 }
