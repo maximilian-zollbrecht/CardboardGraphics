@@ -29,10 +29,14 @@ import static cg.edu.hm.pohl.student.VertexObject.FLOATS_PER_NORMAL;
 public class StudentScene extends VRComponent {
 
     private static final String TAG = "StudentScene";
-    private static final int TESSELLATION = 8;
-    private static final float RADIUS = 1f;
-    private static final FloatColor clothColor = new FloatColor(0.52f, 0.82f, 0.47f, 1f);
+    private static final int TESSELLATION = 32;
+    private static final float SIZE = .8f;
+    private static final FloatColor clothColor = new FloatColor(0.6f, 0.75f, 0.47f, 1f);
     private static final FloatColor skinColor = new FloatColor(0.80f, 0.61f, 0.45f, 1f);
+    private static final FloatColor noseColor = new FloatColor(0.75f, 0.55f, 0.4f, 1f);
+    private static final FloatColor eyeColor = new FloatColor(0, 0.99f, 0.7f, 1f);
+    private static final FloatColor pupilColor = new FloatColor(0.05f, 0.05f, 0.05f, 1f);
+    private static final FloatColor mouthColor = new FloatColor(0.5f, 0.27f, 0.2f, 1f);
 
     private List<VertexObjectBuffer> buffers = new ArrayList<>();
 
@@ -50,15 +54,47 @@ public class StudentScene extends VRComponent {
     public StudentScene() {
         shader = CardboardGraphicsActivity.studentSceneShader;
 
-        Cone upper = new Cone(TESSELLATION, RADIUS-0.2f, 1.0f, clothColor);
-        upper.move(0,.7f,0);
+        Cone upper = new Cone(TESSELLATION, .9f*SIZE, 2*SIZE, clothColor);
+        upper.move(0,.5f*SIZE,0);
         addVertexObject(upper);
 
-        Sphere middle = new Sphere(16, 1.0f, skinColor);
+        Sphere middle = new Sphere(TESSELLATION, SIZE , skinColor);
         addVertexObject(middle);
 
-        Cone lower = new Cone(TESSELLATION, RADIUS, 1.0f, clothColor);
-        lower.move(0,-1.5f,0);
+        Sphere eye1 = new Sphere(4, 0.15f*SIZE, eyeColor);
+        eye1.move(.3f*SIZE, .2f*SIZE, .9f*SIZE);
+        addVertexObject(eye1);
+
+        Sphere pupil1 = new Sphere(4, 0.08f*SIZE, pupilColor);
+        pupil1.move(.3f*SIZE, .2f*SIZE, 1f*SIZE);
+        addVertexObject(pupil1);
+
+        Sphere eye2 = new Sphere(4, 0.15f*SIZE, eyeColor);
+        eye2.move(-.3f*SIZE, .2f*SIZE, .9f*SIZE);
+        addVertexObject(eye2);
+
+        Sphere pupil2 = new Sphere(4, 0.08f*SIZE, pupilColor);
+        pupil2.move(-.3f*SIZE, .2f*SIZE, 1f*SIZE);
+        addVertexObject(pupil2);
+
+        Cone mouth = new Cone(TESSELLATION, 0.6f*SIZE, .2f*SIZE, mouthColor);
+        mouth.move(0,-.4f*SIZE,.48f*SIZE);
+        addVertexObject(mouth);
+
+        Cone nose = new Cone(TESSELLATION, 0.25f*SIZE, 0.35f*SIZE, noseColor);
+        nose.move(0,-.1f*SIZE,.9f*SIZE);
+        addVertexObject(nose);
+
+        Cone ear1 = new Cone(4, 0.15f*SIZE, 1f*SIZE, noseColor);
+        ear1.move(-.9f*SIZE,0,0);
+        addVertexObject(ear1);
+
+        Cone ear2 = new Cone(4, 0.15f*SIZE, 1f*SIZE, noseColor);
+        ear2.move(.9f*SIZE,0,0);
+        addVertexObject(ear2);
+
+        Cone lower = new Cone(TESSELLATION, SIZE*1.5f, SIZE, clothColor);
+        lower.move(0,-1.5f*SIZE,0);
         addVertexObject(lower);
 
         // Get the shader's attribute and uniform handles used to delegate data from
@@ -105,7 +141,7 @@ public class StudentScene extends VRComponent {
         glUniform4fv(locations.light_diffuse, 1, light.diffuse, 0);
         glUniform4fv(locations.light_specular, 1, light.specular, 0);
 
-        // Finally draw the cone
+        // Finally draw the objects
         drawObjects();
 
         // Check for possible errors.
