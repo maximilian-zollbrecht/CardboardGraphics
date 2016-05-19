@@ -26,9 +26,9 @@ import static cg.edu.hm.pohl.student.VertexObject.FLOATS_PER_NORMAL;
 /**
  * Created by Pohl on 14.04.2016.
  */
-public class StudentScene extends VRComponent {
+public class JetFuelCantMeltDankMemes extends VRComponent {
 
-    private static final String TAG = "StudentScene";
+    private static final String TAG = "JetFuelCantMeltDankMemes";
     private static final int TESSELLATION = 32;
     private static final float SIZE = .8f;
     private static final FloatColor clothColor = new FloatColor(0.6f, 0.75f, 0.47f, 1f);
@@ -51,7 +51,7 @@ public class StudentScene extends VRComponent {
 
     private DataStructures.LightParameters light = new DataStructures.LightParameters();
 
-    public StudentScene() {
+    public JetFuelCantMeltDankMemes() {
         shader = CardboardGraphicsActivity.studentSceneShader;
 
         Cone upper = new Cone(TESSELLATION, .9f*SIZE, 2*SIZE, clothColor);

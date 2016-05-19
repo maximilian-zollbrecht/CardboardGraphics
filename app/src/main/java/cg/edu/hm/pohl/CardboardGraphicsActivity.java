@@ -9,7 +9,7 @@ import ba.pohl1.hm.edu.vrlibrary.ui.AbstractCardboardActivity;
 import ba.pohl1.hm.edu.vrlibrary.util.CardboardGraphics;
 import ba.pohl1.hm.edu.vrlibrary.util.Shader;
 import ba.pohl1.hm.edu.vrlibrary.model.shapes.VRRoom;
-import cg.edu.hm.pohl.student.StudentScene;
+import cg.edu.hm.pohl.student.JetFuelCantMeltDankMemes;
 
 /**
  * Created by Pohl on 14.04.2016.
@@ -20,7 +20,7 @@ public class CardboardGraphicsActivity extends AbstractCardboardActivity {
     private static final int WAYPOINTS = 6;
     private static final float WAYPOINTS_DISTANCE = 2.5f;
 
-    private StudentScene studentScene;
+    private JetFuelCantMeltDankMemes jetFuelCantMeltDankMemes;
 
     @Override
     protected int getCardboardViewId() {
@@ -45,8 +45,8 @@ public class CardboardGraphicsActivity extends AbstractCardboardActivity {
 
         final VRRoom vrRoom = new VRRoom(25, 10, 25);
 
-        studentScene = new StudentScene();
-        vrRoom.add(studentScene);
+        jetFuelCantMeltDankMemes = new JetFuelCantMeltDankMemes();
+        vrRoom.add(jetFuelCantMeltDankMemes);
         return vrRoom;
     }
 
@@ -74,7 +74,7 @@ public class CardboardGraphicsActivity extends AbstractCardboardActivity {
         // Clear all default way points
         getNavigator().dispose();
 
-        final Vector3 scenePos = studentScene.getPosition();
+        final Vector3 scenePos = jetFuelCantMeltDankMemes.getPosition();
         float x = scenePos.x;
         float y = scenePos.y;
         float z = scenePos.z;
