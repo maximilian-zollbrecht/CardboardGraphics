@@ -4,7 +4,9 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ba.pohl1.hm.edu.vrlibrary.model.VRComponent;
 import ba.pohl1.hm.edu.vrlibrary.rendering.RendererManager;
@@ -38,7 +40,7 @@ public class JetFuelCantMeltDankMemes extends VRComponent {
     private static final FloatColor pupilColor = new FloatColor(0.05f, 0.05f, 0.05f, 1f);
     private static final FloatColor mouthColor = new FloatColor(0.5f, 0.27f, 0.2f, 1f);
 
-    private List<VertexObjectBuffer> buffers = new ArrayList<>();
+    private Map<VertexObject, VertexObjectBuffer> buffers = new HashMap<>();
 
     private Shader shader;
 
@@ -61,19 +63,19 @@ public class JetFuelCantMeltDankMemes extends VRComponent {
         Sphere middle = new Sphere(TESSELLATION, SIZE , skinColor);
         addVertexObject(middle);
 
-        Sphere eye1 = new Sphere(4, 0.15f*SIZE, eyeColor);
+        Sphere eye1 = new Sphere(8, 0.15f*SIZE, eyeColor);
         eye1.move(.3f*SIZE, .2f*SIZE, .9f*SIZE);
         addVertexObject(eye1);
 
-        Sphere pupil1 = new Sphere(4, 0.08f*SIZE, pupilColor);
+        Sphere pupil1 = new Sphere(8, 0.08f*SIZE, pupilColor);
         pupil1.move(.3f*SIZE, .2f*SIZE, 1f*SIZE);
         addVertexObject(pupil1);
 
-        Sphere eye2 = new Sphere(4, 0.15f*SIZE, eyeColor);
+        Sphere eye2 = new Sphere(8, 0.15f*SIZE, eyeColor);
         eye2.move(-.3f*SIZE, .2f*SIZE, .9f*SIZE);
         addVertexObject(eye2);
 
-        Sphere pupil2 = new Sphere(4, 0.08f*SIZE, pupilColor);
+        Sphere pupil2 = new Sphere(8, 0.08f*SIZE, pupilColor);
         pupil2.move(-.3f*SIZE, .2f*SIZE, 1f*SIZE);
         addVertexObject(pupil2);
 
@@ -151,17 +153,27 @@ public class JetFuelCantMeltDankMemes extends VRComponent {
         CGUtils.checkGLError(TAG, "Error while drawing!");
     }
 
-    private void drawObjects() {
-        for(VertexObjectBuffer buffer : buffers){
-            glVertexAttribPointer(locations.vertex_in, FLOATS_PER_VERTEX, GL_FLOAT, false, 0, buffer.getVerticesBuffer());
-            glVertexAttribPointer(locations.color_in, FLOATS_PER_COLOR, GL_FLOAT, false, 0, buffer.getColorsBuffer());
-            glVertexAttribPointer(locations.normal_in, FLOATS_PER_NORMAL, GL_FLOAT, false, 0, buffer.getNormalsBuffer());
+    private void drawObject(VertexObject object){
+        VertexObjectBuffer buffer = buffers.get(object);
 
-            glDrawArrays(GLES20.GL_TRIANGLES, 0, buffer.getObject().getVertices().length / FLOATS_PER_VERTEX);
+        glVertexAttribPointer(locations.vertex_in, FLOATS_PER_VERTEX, GL_FLOAT, false, 0, buffer.getVerticesBuffer());
+        glVertexAttribPointer(locations.color_in, FLOATS_PER_COLOR, GL_FLOAT, false, 0, buffer.getColorsBuffer());
+        glVertexAttribPointer(locations.normal_in, FLOATS_PER_NORMAL, GL_FLOAT, false, 0, buffer.getNormalsBuffer());
+
+        glDrawArrays(GLES20.GL_TRIANGLES, 0, object.getVertices().length / FLOATS_PER_VERTEX);
+    }
+
+    private void drawObjects() {
+        for(Map.Entry<VertexObject, VertexObjectBuffer> entry : buffers.entrySet()){
+            glVertexAttribPointer(locations.vertex_in, FLOATS_PER_VERTEX, GL_FLOAT, false, 0, entry.getValue().getVerticesBuffer());
+            glVertexAttribPointer(locations.color_in, FLOATS_PER_COLOR, GL_FLOAT, false, 0, entry.getValue().getColorsBuffer());
+            glVertexAttribPointer(locations.normal_in, FLOATS_PER_NORMAL, GL_FLOAT, false, 0, entry.getValue().getNormalsBuffer());
+
+            glDrawArrays(GLES20.GL_TRIANGLES, 0, entry.getKey().getVertices().length / FLOATS_PER_VERTEX);
         }
     }
 
     private void addVertexObject(VertexObject object){
-        buffers.add(new VertexObjectBuffer(object));
+        buffers.put(object, new VertexObjectBuffer(object));
     }
 }
