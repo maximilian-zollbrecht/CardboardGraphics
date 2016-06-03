@@ -21,7 +21,7 @@ public class Cone extends VertexObject {
         this.height = height;
         this.tessselation = tessselation;
 
-        final int verticesNumber = tessselation * 3 * 3 * 2 * 2;
+        final int verticesNumber = tessselation * 3 * 3 * 2;
         final double deltaAngle = (Math.PI / (tessselation / 2));
 
         coneVertices = new float[verticesNumber];
