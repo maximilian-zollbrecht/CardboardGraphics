@@ -16,7 +16,11 @@ public class Cone extends VertexObject {
     private float[] coneColors;
     private float[] coneNormals;
 
-    public Cone(int tessselation, float radius, float height, FloatColor color){
+    public Cone(int tessselation, float radius, float height, FloatColor... colors){
+        if(colors.length==0) {
+            colors = new FloatColor[]{new FloatColor(1f, 1f, 1f, 1f)};
+        }
+
         this.radius = radius;
         this.height = height;
         this.tessselation = tessselation;
@@ -39,8 +43,6 @@ public class Cone extends VertexObject {
             // Calculate offset for vertices and colors
             final int vertexIndex = index * 18;
             final int colorIndex = index * 24;
-            // Increment the index
-            index++;
 
             // First vertex
             coneVertices[vertexIndex] = 0;
@@ -86,31 +88,41 @@ public class Cone extends VertexObject {
             coneNormals[vertexIndex + 16] = 1f;
             coneNormals[vertexIndex + 17] = 0;
 
+            FloatColor color = colors[index%colors.length];
+
             coneColors[colorIndex] = color.getR();
             coneColors[colorIndex + 1] = color.getG();
             coneColors[colorIndex + 2] = color.getB();
             coneColors[colorIndex + 3] = color.getA();
+
             coneColors[colorIndex + 4] = color.getR();
             coneColors[colorIndex + 5] = color.getG();
             coneColors[colorIndex + 6] = color.getB();
             coneColors[colorIndex + 7] = color.getA();
+
             coneColors[colorIndex + 8] = color.getR();
             coneColors[colorIndex + 9] = color.getG();
             coneColors[colorIndex + 10] = color.getB();
             coneColors[colorIndex + 11] = color.getA();
 
+
             coneColors[colorIndex + 12] = color.getR();
             coneColors[colorIndex + 13] = color.getG();
             coneColors[colorIndex + 14] = color.getB();
             coneColors[colorIndex + 15] = color.getA();
+
             coneColors[colorIndex + 16] = color.getR();
             coneColors[colorIndex + 17] = color.getG();
             coneColors[colorIndex + 18] = color.getB();
             coneColors[colorIndex + 19] = color.getA();
+
             coneColors[colorIndex + 20] = color.getR();
             coneColors[colorIndex + 21] = color.getG();
             coneColors[colorIndex + 22] = color.getB();
             coneColors[colorIndex + 23] = color.getA();
+
+            // Increment the index
+            index++;
         }
     }
 

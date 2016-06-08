@@ -28,13 +28,23 @@ public class JetFuelCantMeltDankMemes extends VRComponent {
     private static final float SIZE = .8f;
     private static final float HEIGHT = 2f;
     private static final float OFFSET = -4f;
-    private static final FloatColor clothColor = new FloatColor(0.6f, 0.75f, 0.47f, 1f);
+    private static final FloatColor[] clothColor = {
+            new FloatColor(0.6f, 0.75f, 0.47f, 1f),
+            new FloatColor(0.61f, 0.76f, 0.48f, 1f)
+    };
     private static final FloatColor skinColor = new FloatColor(0.80f, 0.61f, 0.45f, 1f);
     private static final FloatColor noseColor = new FloatColor(0.79f, 0.55f, 0.4f, 1f);
     private static final FloatColor eyeColor = new FloatColor(0, 0.99f, 0.7f, 1f);
     private static final FloatColor pupilColor = new FloatColor(0.05f, 0.05f, 0.05f, 1f);
     private static final FloatColor mouthColor = new FloatColor(0.5f, 0.27f, 0.2f, 1f);
-    private static final FloatColor shotColor = new FloatColor(0.4f, 0.9f, 0.4f, 1f);
+    private static final FloatColor[] shotColors = {
+            new FloatColor(0.99f, 0.1f, 0.1f, 1f),
+            new FloatColor(0.99f, 0.49f, 0.1f, 1f),
+            new FloatColor(0.99f, 0.99f, 0.1f, 1f),
+            new FloatColor(0.1f, 0.99f, 0.1f, 1f),
+            new FloatColor(0.1f, 0.99f, 0.99f, 1f),
+            new FloatColor(0.99f, 0.1f, 0.99f, 1f),
+    };
 
     private Map<VertexObject, VertexObjectBuffer> buffers = new HashMap<>();
 
@@ -125,7 +135,7 @@ public class JetFuelCantMeltDankMemes extends VRComponent {
             }
         });
 
-        Cylinder shot = new Cylinder(TESSELLATION, .2f, 5f, shotColor);
+        Cylinder shot = new Cylinder(TESSELLATION, .2f, 20f, shotColors);
         components.add(new VertexComponent(0, -.33f*SIZE + HEIGHT, OFFSET, shot){
             @Override
             public void animate(int animationFrame) {
@@ -133,7 +143,7 @@ public class JetFuelCantMeltDankMemes extends VRComponent {
                 if(animationFrame%1000<100) {
                     scale(1f, animationFrame % 100 / 100f, 1f);
                 } else {
-                    scale(1f, .01f, 1f);
+                    scale(1f, .0025f, 1f);
                 }
             }
         });

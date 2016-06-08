@@ -16,7 +16,11 @@ public class Cylinder extends VertexObject {
     private float[] coneColors;
     private float[] coneNormals;
 
-    public Cylinder(int tessselation, float radius, float height, FloatColor color){
+    public Cylinder(int tessselation, float radius, float height, FloatColor... colors){
+        if(colors.length==0) {
+            colors = new FloatColor[]{new FloatColor(1f, 1f, 1f, 1f)};
+        }
+
         this.radius = radius;
         this.height = height;
         this.tessselation = tessselation;
@@ -34,9 +38,7 @@ public class Cylinder extends VertexObject {
         int vertexIndex = 0;
         int colorIndex = 0;
 
-        System.out.println(verticesNumber);
         for(float angle = 0.0f; angle < Math.PI*2.0; angle += deltaAngle) {
-            System.out.println(vertexIndex);
             // Calculate x and z of the cone
             float x1 = (float) (radius * Math.sin(angle));
             float z1 = (float) (radius * Math.cos(angle));
@@ -145,12 +147,19 @@ public class Cylinder extends VertexObject {
             coneNormals[vertexIndex + 2] = 0;
             vertexIndex += 3;
 
-            for(int i=0; i<coneColors.length; i+=4){
-                coneColors[i] = color.getR();
-                coneColors[i+1] = color.getG();
-                coneColors[i+2] = color.getB();
-                coneColors[i+3] = color.getA();
+
+            FloatColor color = colors[index%colors.length];
+
+            // System.out.println("Color : "+color.getR()+" "+color.getG()+" "+color.getB());
+            for(int i=0; i<12*4; i+=4){
+                coneColors[colorIndex+i] = color.getR();
+                coneColors[colorIndex+i+1] = color.getG();
+                coneColors[colorIndex+i+2] = color.getB();
+                coneColors[colorIndex+i+3] = color.getA();
             }
+            colorIndex += 12*4;
+
+            index++;
         }
     }
 

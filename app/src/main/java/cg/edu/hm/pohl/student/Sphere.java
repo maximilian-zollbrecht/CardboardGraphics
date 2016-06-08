@@ -16,16 +16,21 @@ public class Sphere extends VertexObject {
 
     private final float[] vertices, colors, normals;
 
-    public Sphere(int tessselation, float radius, FloatColor color) {
+    public Sphere(int tessselation, float radius, FloatColor... colors) {
+        if(colors.length==0) {
+            colors = new FloatColor[]{new FloatColor(1f, 1f, 1f, 1f)};
+        }
+
         this.tessselation = tessselation;
         this.radius = radius;
 
         final int vertexNumber = tessselation * tessselation/2 * 3 * 3 *2;
 
         vertices = new float[vertexNumber];
-        colors = new float[vertexNumber/3*4];
+        this.colors = new float[vertexNumber/3*4];
         normals = new float[vertexNumber];
 
+        int index = 0;
         int vertexIndex = 0;
         int colorIndex = 0;
         final float deltaAngle = (float) Math.PI/tessselation*2;
@@ -101,13 +106,17 @@ public class Sphere extends VertexObject {
                     vertexIndex += 9;
                 }
 
+                FloatColor color = colors[index%colors.length];
+
                 for(int k=0; k<6*4; k+=4){
-                    colors[colorIndex+k] = color.getR();
-                    colors[colorIndex+k+1] = color.getG();
-                    colors[colorIndex+k+2] = color.getB();
-                    colors[colorIndex+k+3] = color.getA();
+                    this.colors[colorIndex+k] = color.getR();
+                    this.colors[colorIndex+k+1] = color.getG();
+                    this.colors[colorIndex+k+2] = color.getB();
+                    this.colors[colorIndex+k+3] = color.getA();
                 }
                 colorIndex += 6*4;
+
+                index++;
             }
         }
     }
