@@ -33,7 +33,7 @@ public class JetFuelCantMeltDankMemes extends VRComponent {
             new FloatColor(0.61f, 0.76f, 0.48f, 1f)
     };
     private static final FloatColor skinColor = new FloatColor(0.80f, 0.61f, 0.45f, 1f);
-    private static final FloatColor noseColor = new FloatColor(0.79f, 0.55f, 0.4f, 1f);
+    private static final FloatColor noseColor = new FloatColor(0.62f, 0.46f, 0.32f, 1f);
     private static final FloatColor eyeColor = new FloatColor(0, 0.99f, 0.7f, 1f);
     private static final FloatColor pupilColor = new FloatColor(0.05f, 0.05f, 0.05f, 1f);
     private static final FloatColor mouthColor = new FloatColor(0.5f, 0.27f, 0.2f, 1f);
@@ -66,49 +66,50 @@ public class JetFuelCantMeltDankMemes extends VRComponent {
 
 
         // Create Components
-        Cone hat = new Cone(TESSELLATION, .9f*SIZE, 2*SIZE, clothColor);
-        components.add(new VertexComponent(0,.5f*SIZE + HEIGHT,OFFSET, hat));
+        Cone upper = new Cone(TESSELLATION, .9f*SIZE, 2*SIZE, clothColor);
+        VertexComponent hat = new VertexComponent(0,.5f*SIZE + HEIGHT,OFFSET, upper);
+        hat.setDiffuse(.3f);
+        hat.setSpecular(.15f);
+        components.add(hat);
 
         Sphere middle = new Sphere(TESSELLATION, SIZE , skinColor);
-        components.add(new VertexComponent(0,HEIGHT,OFFSET, middle));
+        VertexComponent head = new VertexComponent(0,HEIGHT,OFFSET, middle);
+        head.setDiffuse(.4f);
+        head.setSpecular(.2f);
+        components.add(head);
 
         Sphere eye1 = new Sphere(EYE_TESSELLATION, 0.15f*SIZE, eyeColor);
-        components.add(new VertexComponent(.3f*SIZE, .2f*SIZE + HEIGHT, .9f*SIZE + OFFSET, eye1){
+        Sphere pupil1 = new Sphere(EYE_TESSELLATION, 0.08f*SIZE, pupilColor);
+        pupil1.move(0, 0, .08f);
+
+        VertexComponent leftEye = new VertexComponent(eye1, pupil1){
             @Override
             public void animate(int animationFrame) {
                 float progress = (float) Math.sin(animationFrame/100d);
                 scale(1f+Math.max(progress, 0));
             }
-        });
-
-        Sphere pupil1 = new Sphere(EYE_TESSELLATION, 0.08f*SIZE, pupilColor);
-        components.add(new VertexComponent(.3f*SIZE, .2f*SIZE + HEIGHT, 1f*SIZE + OFFSET, pupil1) {
-            @Override
-            public void animate(int animationFrame) {
-                float progress = Math.max(0,(float) Math.sin(animationFrame/100d));
-                scale(1f+progress);
-                translateZ(progress*0.1f);
-            }
-        });
+        };
+        leftEye.setX(.3f*SIZE);
+        leftEye.setY(.2f*SIZE + HEIGHT);
+        leftEye.setZ(.9f*SIZE + OFFSET);
+        leftEye.setSpecular(1f);
+        components.add(leftEye);
 
         Sphere eye2 = new Sphere(EYE_TESSELLATION, 0.15f*SIZE, eyeColor);
-        components.add(new VertexComponent(-.3f*SIZE, .2f*SIZE + HEIGHT, .9f*SIZE + OFFSET, eye1){
+        Sphere pupil2 = new Sphere(EYE_TESSELLATION, 0.08f*SIZE, pupilColor);
+        pupil2.move(0, 0, .08f);
+        VertexComponent rightEye = new VertexComponent(eye2, pupil2){
             @Override
             public void animate(int animationFrame) {
                 float progress = (float) Math.sin((animationFrame-100)/100d);
                 scale(1f+Math.max(progress, 0));
             }
-        });
-
-        Sphere pupil2 = new Sphere(EYE_TESSELLATION, 0.08f*SIZE, pupilColor);
-        components.add(new VertexComponent(-.3f*SIZE, .2f*SIZE + HEIGHT, 1f*SIZE + OFFSET, pupil1) {
-            @Override
-            public void animate(int animationFrame) {
-                float progress = Math.max(0,(float) Math.sin((animationFrame-100)/100d));
-                scale(1f+progress);
-                translateZ(progress*0.1f);
-            }
-        });
+        };
+        rightEye.setX(-.3f*SIZE);
+        rightEye.setY(.2f*SIZE + HEIGHT);
+        rightEye.setZ(.9f*SIZE + OFFSET);
+        rightEye.setSpecular(1f);
+        components.add(rightEye);
 
         Cone mouth = new Cone(TESSELLATION, 0.6f*SIZE, .2f*SIZE, mouthColor);
         components.add(new VertexComponent(0,-.4f*SIZE + HEIGHT,.48f*SIZE + OFFSET, mouth){
@@ -135,42 +136,54 @@ public class JetFuelCantMeltDankMemes extends VRComponent {
             }
         });
 
-        Cylinder shot = new Cylinder(TESSELLATION, .2f, 20f, shotColors);
-        components.add(new VertexComponent(0, -.33f*SIZE + HEIGHT, OFFSET, shot){
+        Cylinder shot = new Cylinder(TESSELLATION, .2f, 15f, shotColors);
+        CylinderNormalLines cylinderNormalLines = new CylinderNormalLines(shot);
+        VertexComponent rainbowShot = new VertexComponent(0, -.33f*SIZE + HEIGHT, OFFSET, shot, cylinderNormalLines){
             @Override
             public void animate(int animationFrame) {
-                rotateX(90f);
                 if(animationFrame%1000<100) {
                     scale(1f, animationFrame % 100 / 100f, 1f);
                 } else {
                     scale(1f, .0025f, 1f);
                 }
             }
-        });
+        };
+        rainbowShot.setRx(90f);
+        rainbowShot.setSpecular(1f);
+        components.add(rainbowShot);
 
-        Cone nose = new Cone(TESSELLATION, 0.25f*SIZE, 0.35f*SIZE, noseColor);
-        components.add(new VertexComponent(0,-.1f*SIZE + HEIGHT,.9f*SIZE + OFFSET, nose));
+        Cone noseCone = new Cone(TESSELLATION, 0.25f*SIZE, 0.35f*SIZE, noseColor);
+        VertexComponent nose = new VertexComponent(0,-.1f*SIZE + HEIGHT,.9f*SIZE + OFFSET, noseCone);
+        nose.setDiffuse(.45f);
+        nose.setSpecular(.5f);
+        components.add(nose);
 
         Cone ear1 = new Cone(4, 0.15f*SIZE, 1f*SIZE, noseColor);
-        components.add(new VertexComponent(-.9f*SIZE, HEIGHT, OFFSET, ear1){
+        VertexComponent rightEar =new VertexComponent(-.9f*SIZE, HEIGHT, OFFSET, ear1){
             @Override
             public void animate(int animationFrame) {
                 float angle = (float) Math.sin(animationFrame/100d)*90f;
                 rotateZ(angle*.25f + 22.5f);
             }
-        });
+        };
+        rightEar.setDiffuse(.4f);
+        components.add(rightEar);
 
         Cone ear2 = new Cone(4, 0.15f*SIZE, 1f*SIZE, noseColor);
-        components.add(new VertexComponent(.9f*SIZE, HEIGHT, OFFSET, ear1){
+        VertexComponent leftEar = new VertexComponent(.9f*SIZE, HEIGHT, OFFSET, ear2){
             @Override
             public void animate(int animationFrame) {
                 float angle = (float) Math.sin(animationFrame/100d)*90f;
                 rotateZ(angle*-.25f - 22.5f);
             }
-        });
+        };
+        leftEar.setDiffuse(.4f);
+        components.add(leftEar);
 
         Cone lower = new Cone(TESSELLATION, SIZE*1.5f, SIZE, clothColor);
-        components.add(new VertexComponent(0, -1.5f*SIZE + HEIGHT, OFFSET, lower));
+        VertexComponent body = new VertexComponent(0, -1.5f*SIZE + HEIGHT, OFFSET, lower);
+        body.setDiffuse(.2f);
+        components.add(body);
 
         // Get the shader's attribute and uniform handles used to delegate data from
         // the CPU to the GPU

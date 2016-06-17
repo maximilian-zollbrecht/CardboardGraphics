@@ -32,8 +32,10 @@ public class Cone extends VertexObject {
         coneColors = new float[verticesNumber / 3 * 4];
         coneNormals = new float[verticesNumber];
 
-        int index = 0;
-        for(float angle = 0.0f; angle < Math.PI*2.0; angle += deltaAngle) {
+        float angle = 0f;
+        for(int index = 0; index < tessselation; index++) {
+            angle = (float) (index*deltaAngle);
+        //for(float angle = 0.0f; angle < Math.PI*2.0; angle += deltaAngle) {
             // Calculate x and z of the cone
             float x1 = (float) (radius * Math.sin(angle));
             float z1 = (float) (radius * Math.cos(angle));
@@ -120,9 +122,6 @@ public class Cone extends VertexObject {
             coneColors[colorIndex + 21] = color.getG();
             coneColors[colorIndex + 22] = color.getB();
             coneColors[colorIndex + 23] = color.getA();
-
-            // Increment the index
-            index++;
         }
     }
 

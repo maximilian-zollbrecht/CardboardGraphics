@@ -1,5 +1,7 @@
 package cg.edu.hm.pohl.student;
 
+import cg.edu.hm.pohl.DataStructures;
+
 /**
  * Created by Maximilian on 18.05.2016.
  */
